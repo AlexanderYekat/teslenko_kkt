@@ -85,6 +85,7 @@ type
       function PrintWideString(sLine: string): Bool;
       function IsFFD12():boolean;
       function PrintQRCode(text:string):bool;
+      function ParsMarka(marka:string; var gtin:string; var serial:string; var tail:string):boolean;
       function CheckMarkRR(addressService:string; MarkingCodeDurty:string):TApiResponse;
       function CheckMarkOnServer(returnCheck:boolean; matrix, gtin, serial, tail:string):integer;
       function Sale(returnCheck:boolean; sLine: string; cQty: Currency; cPrice: Currency; iDepartment, iTaxIx: Integer;
@@ -1719,6 +1720,63 @@ begin
  end;
 end; //TVariantPrint.PrintQRCode
 
+function TVariantPrint.ParsMarka(marka:string; var gtin:string; var serial:string; var tail:string):boolean;
+var
+ str:string;
+ dl, nomSymbDev91, nomSymbDev92, nomSymbDevSl, nomSymbGS, Prom1, Prom2, Prom21, Prom22, Prom33, nomSymbDev:integer;
+ strSSeriey:string;
+begin
+ tail:='';
+ result:=false;
+ if Length(marka) < 16 then exit;
+ result:=true;
+ str:=marka;
+ //str:='fffff';
+ if copy(str, 1, 1) <> '0' then begin
+  str:=copy(str, 2, 1000);
+ end;
+ gtin:=copy(str, 3, 14);
+ dl:=Length(str);
+ //                17             32
+ //0104604278003594215axr4)K7FR8Eo-91EE07-92FjQwBfFGbJbJbuMnX/tFGKYMIelEXTaaN968D3SVNP0=
+ strSSeriey:=copy(str, 2+14+2 + 1, dl - (2+14+2));
+ nomSymbDev91:=Pos('91', strSSeriey);
+ nomSymbDev92:=Pos('92', strSSeriey);
+ nomSymbDevSl:=0;
+ //nomSymbDevSl:=Pos('\', strSSeriey);
+ nomSymbGS:=Pos(Chr(29), strSSeriey);
+ nomSymbDev:=0;
+ //WriteAdvancedLogFile('91', IntToStr(nomSymbDev91));
+ //WriteAdvancedLogFile('92', IntToStr(nomSymbDev92));
+ //WriteAdvancedLogFile('Слеш', IntToStr(nomSymbDevSl));
+ if nomSymbDev91=0 then Prom1:=1000 else Prom1:=nomSymbDev91;
+ if nomSymbDev92=0 then Prom21:=1000 else Prom21:=nomSymbDev92;
+ if nomSymbDevSl=0 then Prom22:=1000 else Prom22:=nomSymbDevSl;
+ if nomSymbGS=0 then Prom33:=1000 else Prom33:=nomSymbGS;
+ Prom2:=Prom21;
+ //WriteAdvancedLogFile('Prom21', IntToStr(Prom21));
+ //WriteAdvancedLogFile('Prom22', IntToStr(Prom22));
+ //WriteAdvancedLogFile('Promc2', IntToStr(Prom2));
+ if Prom21>Prom22 then Prom2:=Prom22;
+ //WriteAdvancedLogFile('Prom2', IntToStr(Prom2));
+ nomSymbDev:=Prom1;
+ if Prom1>Prom2 then nomSymbDev:=Prom2;
+ if nomSymbDev>Prom33 then nomSymbDev:=Prom33;
+ //nomSymbDev:=Prom2;
+ if nomSymbDev = 1000 then nomSymbDev:=0;
+ if nomSymbDev=0 then serial:=strSSeriey else serial:=copy(strSSeriey, 1, nomSymbDev - 1);
+ //if Length(serial) > 13 then serial:=copy(serial, 1, 13);
+ dl:=Length(serial);
+ tail:=copy(strSSeriey, dl+1, 1000);
+ nomSymbGS:=Pos(Chr(29), strSSeriey);
+ if nomSymbGS = 0 then begin
+  tail:=Chr(29)+tail;
+  nomSymbDev92:=Pos('92', tail);
+  tail:=copy(tail, 1, nomSymbDev92-1)+Chr(29)+copy(tail, nomSymbDev92, 300);
+ end;
+end; //ParsMarka    ;
+
+
 function TVariantPrint.CheckMarkRR(addressService:string; MarkingCodeDurty:string):TApiResponse;
 var
   HttpClient: THTTPClient;
@@ -1729,7 +1787,7 @@ var
   ResponseJson, TruemarkResponse: TJSONObject;
   ResponseContent: string;
   MarkBase64Obj: TBase64Encoding;
-  MarkingCode:string;
+  MarkingCode, gtin, serial, tail, markUnion:string;
 begin
   // Инициализация результата
   //Result.Code := -1;
@@ -1740,8 +1798,14 @@ begin
   //Result.ReqTimestamp := 0;
   Result.ReqTimestamp := '';
 
+  markUnion:=MarkingCodeDurty;
   MarkBase64Obj := TBase64Encoding.Create(0);
-  MarkingCode:=MarkBase64Obj.Encode(MarkingCodeDurty);
+  gtin:=''; serial:=''; tail:='';
+  if ParsMarka(MarkingCodeDurty, gtin, serial, tail) then begin
+    markUnion:='01' + gtin + '21' + serial + tail;
+  end;
+
+  MarkingCode:=MarkBase64Obj.Encode(markUnion);
 
   try
     // Создаем JSON для запроса

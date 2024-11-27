@@ -1150,6 +1150,7 @@ begin
                                                                                              TPosition(ListOfPositions[i]).FPosition.GTIN,
                                                                                              TPosition(ListOfPositions[i]).FPosition.Serial,
                                                                                              TPosition(ListOfPositions[i]).FPosition.tail);
+                WriteAdvancedLogFile('Out', 'Результат проверки марки: '+IntToStr(TPosition(ListOfPositions[i]).Validation_result));
                end;
               end;
               for i:=0 to ListOfPositions.Count-1 do begin

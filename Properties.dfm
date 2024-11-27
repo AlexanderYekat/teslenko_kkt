@@ -59,7 +59,7 @@ object fProps: TfProps
     Top = 312
     Width = 87
     Height = 13
-    Caption = 'ver 2024 11 27 03'
+    Caption = 'ver 2024 11 27 04'
   end
   object tbSvrEvents: TToolBar
     Left = 0
