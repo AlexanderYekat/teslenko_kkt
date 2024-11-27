@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{001DC5FF-3D48-4804-B573-A2C02F54C38A}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="CashSvr.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\testRR\rrTestProject.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="CashSvr">
+        <MSBuild Projects="CashSvr.dproj"/>
+    </Target>
+    <Target Name="CashSvr:Clean">
+        <MSBuild Projects="CashSvr.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CashSvr:Make">
+        <MSBuild Projects="CashSvr.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="rrTestProject">
+        <MSBuild Projects="..\testRR\rrTestProject.dproj"/>
+    </Target>
+    <Target Name="rrTestProject:Clean">
+        <MSBuild Projects="..\testRR\rrTestProject.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="rrTestProject:Make">
+        <MSBuild Projects="..\testRR\rrTestProject.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="CashSvr;rrTestProject"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="CashSvr:Clean;rrTestProject:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="CashSvr:Make;rrTestProject:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
