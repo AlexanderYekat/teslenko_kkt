@@ -2051,6 +2051,8 @@ begin
      4:ovObject.setParam(ovObject.LIBFPTR_PARAM_TAX_TYPE, ovObject.LIBFPTR_TAX_NO);
      5:ovObject.setParam(ovObject.LIBFPTR_PARAM_TAX_TYPE, ovObject.LIBFPTR_TAX_VAT0);
      6:ovObject.setParam(ovObject.LIBFPTR_PARAM_TAX_TYPE, ovObject.LIBFPTR_TAX_VAT118);
+     7:ovObject.setParam(ovObject.LIBFPTR_PARAM_TAX_TYPE, ovObject.LIBFPTR_TAX_VAT5);
+     8:ovObject.setParam(ovObject.LIBFPTR_PARAM_TAX_TYPE, ovObject.LIBFPTR_TAX_VAT7);
     end;
 
     ovObject.registration;
@@ -2112,9 +2114,11 @@ begin
 
        if (datamatrix <> '') then begin
         MarkParsed:='01'+gtin+'21'+serial+tail;
-        if (rrRes.ReqId<>'') then begin
+        WriteAdvancedLogFile('Out', 'VersFFD12: '+BoolToStr(VersFFD12));
+        if (rrRes.ReqId<>'') and VersFFD12 then begin
           strUUIDandTime:='UUID='+rrRes.ReqId+'&Time='+rrRes.ReqTimestamp;
           WriteLogFile('Тег 1265 (' + strUUIDandTime + ').');
+          WriteAdvancedLogFile('Out', 'UUIDandTime: '+strUUIDandTime);
 					//ovObject.TagNumber := 1260;
 					//ovObject.TagType := 8; //STLV
 					//tagID := ovObject.FNBeginSTLVTag();
@@ -2122,30 +2126,37 @@ begin
 						ovObject.TagNumber := 1262;
 						ovObject.TagType := 7;
 						ovObject.TagValueStr := '030';
-            ovObject.FNSendTagOperation();
+            ovObject.FNSendTagOperation;
+            WriteAdvancedLogFile('Out', '1262: 030');
+            WriteAdvancedLogFile('Out', '1262: '+ovObject.ResultCodeDescription);
 						//ovObject.FNAddTag();
 
 						//ovObject.TagID := tagID;
 						ovObject.TagNumber := 1263;
 						ovObject.TagType := 7;
 						ovObject.TagValueStr := '21.11.2023';
-            ovObject.FNSendTagOperation();
+            ovObject.FNSendTagOperation;
+            WriteAdvancedLogFile('Out', '1263: 21.11.2023');
+            WriteAdvancedLogFile('Out', '1263: '+ovObject.ResultCodeDescription);
 						//ovObject.FNAddTag();
 
 						//ovObject.TagID := tagID;
 						ovObject.TagNumber := 1264;
 						ovObject.TagType := 7;
 						ovObject.TagValueStr := '1944';
-            ovObject.FNSendTagOperation();
+            ovObject.FNSendTagOperation;
+            WriteAdvancedLogFile('Out', '1264: 1944');
+            WriteAdvancedLogFile('Out', '1264: '+ovObject.ResultCodeDescription);
 						//ovObject.FNAddTag();
 
 						//ovObject.TagID := tagID;
 						ovObject.TagNumber := 1265;
 						ovObject.TagType := 7;
 						ovObject.TagValueStr := strUUIDandTime;
-            ovObject.FNSendTagOperation();
+            ovObject.FNSendTagOperation;
+            WriteAdvancedLogFile('Out', '1265'+strUUIDandTime);
+            WriteAdvancedLogFile('Out', '1265: '+ovObject.ResultCodeDescription);
 						//ovObject.FNAddTag();
-
 					//ovObject.FNSendSTLVTagOperation(); //FNSendSTLVTag
         end;
         if VersFFD12 then begin
@@ -2153,8 +2164,11 @@ begin
          if pos92 > 0 then begin
           tail:=copy(tail, 1, pos92 - 1)+Chr(29)+copy(tail, pos92, 300);
          end;}
+         WriteAdvancedLogFile('Out', 'FNSendItemBarcode: begin');
          ovObject.BarCode:=MarkParsed;
          ovObject.FNSendItemBarcode;
+         WriteAdvancedLogFile('Out', 'FNSendItemBarcode: '+ovObject.ResultCodeDescription);
+         WriteAdvancedLogFile('Out', 'FNSendItemBarcode: end');
         end else begin
          ovObject.MarkingType := $444D; //Data Matrix 3
          //ovObject.GTIN := '00000046198488';
