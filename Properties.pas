@@ -104,6 +104,7 @@ type
     TrayIcon: TTrayIcon;
     TrayPopupMenu: TPopupMenu;
     Label5: TLabel;
+    CancalCheckIfErrorCheckMarkCheckBox: TCheckBox;
     procedure AppException(Sender: TObject; E: Exception);
     procedure pAlertMSG(sText: string);
     function  fnQuestMSG(sText: string): Bool;
@@ -1059,6 +1060,12 @@ begin
               WriteAdvancedLogFile('Out', 'Результат проверки Time: '+PositionObj.rr.ReqTimestamp);
               if PositionObj.rr.Code<>'0' then begin
                WriteAdvancedLogFile('Out', PositionObj.rr.Description);
+               if CancalCheckIfErrorCheckMarkCheckBox.Checked then begin
+                 sLastMessage1 := 'Проблема с проверкой марки по разрешительному режиму: ' + PositionObj.rr.Description;
+                 bFRBusy := False;
+                 sFRQueue := '';
+                 exit;
+               end;
               end;
               PositionObj.FCheckedRR:=true;
              end else begin
@@ -1143,6 +1150,12 @@ begin
                   WriteAdvancedLogFile('Out', 'Результат проверки Time: '+TPosition(ListOfPositions[i]).rr.ReqTimestamp);
                   if PositionObj.rr.Code<>'0' then begin
                    WriteAdvancedLogFile('Out', PositionObj.rr.Description);
+                   if CancalCheckIfErrorCheckMarkCheckBox.Checked then begin
+                     sLastMessage1 := 'Проблема с проверкой марки по разрешительному режиму: ' + PositionObj.rr.Description;
+                     bFRBusy := False;
+                     sFRQueue := '';
+                     Exit;
+                   end;
                   end;
                 end;
                 TPosition(ListOfPositions[i]).Validation_result:=vpCashReg.CheckMarkOnServer(TPosition(ListOfPositions[i]).FReturnCheck,
@@ -1151,6 +1164,17 @@ begin
                                                                                              TPosition(ListOfPositions[i]).FPosition.Serial,
                                                                                              TPosition(ListOfPositions[i]).FPosition.tail);
                 WriteAdvancedLogFile('Out', 'Результат проверки марки: '+IntToStr(TPosition(ListOfPositions[i]).Validation_result));
+                if CancalCheckIfErrorCheckMarkCheckBox.Checked then begin
+                  if (TPosition(ListOfPositions[i]).Validation_result<>15) or
+                      (TPosition(ListOfPositions[i]).Validation_result <> 5) then
+                  begin
+                   sLastMessage1 := 'Проблема с проверкой марки ' + TPosition(ListOfPositions[i]).FPosition.matrixBarcod +
+                                    ' в честном знаке, статус марки ' + IntToStr(TPosition(ListOfPositions[i]).Validation_result);
+                   bFRBusy := False;
+                   sFRQueue := '';
+                   Exit;
+                  end;
+                end;
                end;
               end;
               for i:=0 to ListOfPositions.Count-1 do begin
@@ -1288,7 +1312,7 @@ begin
 
       Application.ProcessMessages;
 
-      if not vpCashReg.CheckFRAdvancedMode(100, 'CancelPreviousDocument') then begin                     // проверка обрыв бумаги
+      if not vpCashReg.CheckFRAdvancedMode(100, 'CancelPreviousDocument') then begin  // проверка обрыв бумаги
          WriteAdvancedLogFile('Out', 'Cancelled. FRState: ' + vpCashReg.ovObject.ResultCodeDescription + '/' + vpCashReg.ovObject.ECRModeDescription + '/' + vpCashReg.ovObject.ECRAdvancedModeDescription);
          sLastMessage1 := 'Проблема с печатью. Отменено пользователем.';
          bFRBusy := False;

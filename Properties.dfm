@@ -55,11 +55,11 @@ object fProps: TfProps
     Caption = #1040#1076#1088#1077#1089' '#1089#1083#1091#1078#1073#1099':'
   end
   object Label5: TLabel
-    Left = 384
-    Top = 312
+    Left = 401
+    Top = 321
     Width = 87
     Height = 13
-    Caption = 'ver 2024 11 27 04'
+    Caption = 'ver 2025 04 17 01'
   end
   object tbSvrEvents: TToolBar
     Left = 0
@@ -340,6 +340,16 @@ object fProps: TfProps
     Height = 21
     TabOrder = 5
     Text = 'localhost:2578/document'
+  end
+  object CancalCheckIfErrorCheckMarkCheckBox: TCheckBox
+    Left = 269
+    Top = 309
+    Width = 260
+    Height = 17
+    Caption = #1054#1090#1084#1077#1085#1103#1090#1100' '#1095#1077#1082', '#1077#1089#1083#1080' '#1086#1096#1080#1073#1082#1072' '#1087#1088#1086#1074#1077#1088#1082#1080' '#1084#1072#1088#1082#1080
+    Checked = True
+    State = cbChecked
+    TabOrder = 6
   end
   object svsctMain: TServerSocket
     Active = False
